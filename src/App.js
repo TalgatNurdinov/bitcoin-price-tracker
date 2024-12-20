@@ -9,6 +9,28 @@ function App() {
   const [overlayColor, setOverlayColor] = useState('transparent');
   const [lastPrice, setLastPrice] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.log(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   useEffect(() => {
     let ws = null;
@@ -119,6 +141,36 @@ function App() {
         transition: 'background-color 0.2s ease',
         pointerEvents: 'none'
       }} />
+
+      <button
+        onClick={toggleFullscreen}
+        style={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          background: 'none',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: '4px',
+          padding: '8px 12px',
+          color: '#9d9d9d',
+          cursor: 'pointer',
+          fontFamily: "'Roboto Mono', monospace",
+          fontSize: '14px',
+          zIndex: 10,
+          transition: 'all 0.2s ease',
+          outline: 'none'
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+          e.target.style.color = '#ffffff';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.backgroundColor = 'transparent';
+          e.target.style.color = '#9d9d9d';
+        }}
+      >
+        {isFullscreen ? '[-]' : '[+]'}
+      </button>
       
       <div style={{
         position: 'relative',
